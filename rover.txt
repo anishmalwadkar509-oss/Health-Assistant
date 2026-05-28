@@ -1,0 +1,160 @@
+#define BLYNK_TEMPLATE_ID "TMPL3XIVzHH7n"
+#define BLYNK_TEMPLATE_NAME "Health Assistant New"
+#define BLYNK_AUTH_TOKEN "y-V_Jso7pR6yIFRJ8PtD2jdMAhPjfgWx"
+
+#define BLYNK_PRINT Serial
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+ 
+//Motor PINs
+#define ENA 16 //D0
+#define IN1 5 //D1
+#define IN2 4 //D2
+#define IN3 0 //D3
+#define IN4 2 //D4
+#define ENB 14 //D5
+   
+bool forward = 0;
+bool backward = 0;
+bool left = 0;
+bool right = 0;
+int Speed;
+
+char auth[] = "y-V_Jso7pR6yIFRJ8PtD2jdMAhPjfgWx"; //Enter your Blynk application auth token
+char ssid[] = "HealthAssistant"; //Enter your WIFI name
+char pass[] = "1234567890"; //Enter your WIFI password
+
+const int relay1 = 15;// pin of D8
+const int relay2 =12;// pin of D6
+ 
+void setup() {
+  Serial.begin(9600);
+  pinMode(ENA, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+  pinMode(ENB, OUTPUT);
+  pinMode(relay1, OUTPUT);
+  pinMode(relay2, OUTPUT);
+  digitalWrite(relay1,HIGH);  // Set digital pin 2 LOW
+  digitalWrite(relay2,HIGH);  // Set digital pin 2 LOW
+ Serial.begin(9600);
+ Blynk.begin(auth,ssid,pass,"blynk.cloud",80);
+}
+ 
+BLYNK_WRITE(V0) {
+  forward = param.asInt();
+}
+ 
+BLYNK_WRITE(V1) {
+  backward = param.asInt();
+}
+ 
+BLYNK_WRITE(V2) {
+  left = param.asInt();
+}
+ 
+BLYNK_WRITE(V3) {
+  right = param.asInt();
+}
+ 
+BLYNK_WRITE(V4) {
+  Speed = param.asInt();
+}
+
+
+BLYNK_WRITE(V5) // Executes when the value of virtual pin 0 changes
+ {
+  if(param.asInt() == 1)
+     {
+    // execute this code if the switch widget is now ON
+    digitalWrite(relay1,LOW);  // Set digital pin 2 HIGH
+    }
+ else
+    {
+    // execute this code if the switch widget is now OFF
+    digitalWrite(relay1,HIGH);  // Set digital pin 2 LOW
+    }
+ }
+ 
+BLYNK_WRITE(V6) // Executes when the value of virtual pin 0 changes
+ {
+  if(param.asInt() == 1)
+     {
+    // execute this code if the switch widget is now ON
+    digitalWrite(relay2,LOW);  // Set digital pin 2 HIGH
+    }
+ else
+    {
+    // execute this code if the switch widget is now OFF
+    digitalWrite(relay2,HIGH);  // Set digital pin 2 LOW
+    }
+}
+
+ 
+void smartcar() {
+  if (forward == 1) {
+    carforward();
+    Serial.println("carforward");
+  } else if (backward == 1) {
+    carbackward();
+    Serial.println("carbackward");
+  } else if (left == 1) {
+    carturnleft();
+    Serial.println("carfleft");
+  } else if (right == 1) {
+    carturnright();
+    Serial.println("carright");
+  } else if (forward == 0 && backward == 0 && left == 0 && right == 0) {
+    carStop();
+    Serial.println("carstop");
+  }
+}
+   
+void loop() {
+ 
+ 
+ Blynk.run();
+  smartcar();
+ 
+}
+
+void carbackward() {
+  analogWrite(ENA, Speed);
+  analogWrite(ENB, Speed);
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+}
+void carforward() {
+  analogWrite(ENA, Speed);
+  analogWrite(ENB, Speed);
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+}
+void carturnleft() {
+  analogWrite(ENA, Speed);
+  analogWrite(ENB, Speed);
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+}
+void carturnright() {
+  analogWrite(ENA, Speed);
+  analogWrite(ENB, Speed);
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+}
+void carStop() {
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+}
